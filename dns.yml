@@ -1,0 +1,15 @@
+dns:
+  enable: true
+  listen: 0.0.0.0:53
+default-nameserver:
+  - 116.116.116.116
+  - 221.5.88.88
+  - 114.114.114.114
+  - 119.29.29.29
+  - 223.5.5.5
+  - 223.6.6.6
+fallback-filter:
+  geoip: true
+  geoip-code: CN
+  ipcidr:
+    - 240.0.0.0/4
