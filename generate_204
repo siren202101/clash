@@ -29,4 +29,4 @@ async function handleRequest(request) {
     // 返回404状态
     return new Response('Not Found', { status: 404 });
 }
-//使用方法Cloudflare Workers地址+/generate_204
+//使用方法Cloudflare Workers绑定的域名/generate_204
