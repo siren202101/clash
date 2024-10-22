@@ -3,8 +3,30 @@ addEventListener('fetch', event => {
 });
 
 async function handleRequest(request) {
-    return new Response(null, {
-        status: 204,
-        statusText: 'No Content'
-    });
+    const url = new URL(request.url);
+    const startTime = Date.now();
+
+    // 记录访问日志
+    const clientIP = request.headers.get('cf-connecting-ip');
+    console.log(`Request from: ${clientIP} at ${new Date().toISOString()}`);
+
+    if (url.pathname === '/generate_204') {
+        // 返回204状态
+        const response = new Response(null, {
+            status: 204,
+            statusText: 'No Content'
+        });
+        // 设置CORS头
+        response.headers.set('Access-Control-Allow-Origin', '*');
+
+        // 测量延迟
+        const endTime = Date.now();
+        console.log(`Response time: ${endTime - startTime} ms`);
+
+        return response;
+    }
+
+    // 返回404状态
+    return new Response('Not Found', { status: 404 });
 }
+//使用方法Cloudflare Workers地址+/generate_204
