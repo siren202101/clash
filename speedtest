@@ -1,0 +1,59 @@
+export default {
+  async fetch(request) {
+    // 创建一个新的 URL 对象
+    let url = new URL(request.url);
+    let path = url.pathname.substring(1).toLowerCase(); // 去掉开头的 "/"
+    let isSecure = url.protocol.startsWith("https");
+    let bytes;
+
+    // 检查路径是否指定了文件大小
+    if (!path) {
+      // 未指定路径时，默认 50MB
+      bytes = 50 * 1000000;
+    } else if (path === "locations") {
+      // 返回 Cloudflare 测速点的位置
+      let targetUrl = `http${isSecure ? 's' : ''}://speed.cloudflare.com/locations`;
+      let cfRequest = new Request(targetUrl, request);
+      return await fetch(cfRequest);
+    } else if (path === "50m") {
+      // 如果路径是 '50m'，设定为 50MB
+      bytes = 50 * 1000000;
+    } else if (path === "500m") {
+      // 如果路径是 '500m'，设定为 500MB
+      bytes = 500 * 1000000;
+    } else {
+      // 处理其他自定义大小的路径
+      const regex = /^(\d+)([kmg]?)$/i;
+      const match = path.match(regex);
+
+      if (!match) {
+        return new Response("路径格式不正确。请输入文件大小（如 50m 或 500m）", {
+          status: 400,
+        });
+      }
+
+      // 提取数字和单位
+      const bytesStr = match[1];
+      const unit = match[2].toLowerCase();
+
+      // 根据单位转换大小
+      bytes = parseInt(bytesStr, 10);
+      if (unit === "k") {
+        bytes *= 1000;
+      } else if (unit === "m") {
+        bytes *= 1000000;
+      } else if (unit === "g") {
+        bytes *= 1000000000;
+      }
+    }
+
+    // 构建测速的目标URL
+    let targetUrl = `http${isSecure ? 's' : ''}://speed.cloudflare.com/__down?bytes=${bytes}`;
+    let cfRequest = new Request(targetUrl, request);
+    let response = await fetch(cfRequest);
+
+    // 返回测速数据
+    return response;
+  }
+};
+//使用方法 Cloudflare Workers域名/自定义大小   例如：https://example.com/100m
