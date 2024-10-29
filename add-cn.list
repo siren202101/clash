@@ -1,6 +1,6 @@
 ;Deepl域名
-DOMAIN,linguee.com
-DOMAIN,deepl.com
+DOMAIN-SUFFIX,linguee.com
+DOMAIN-SUFFIX,deepl.com
 ;自建网站
 DOMAIN,www.banana.free.hr
 DOMAIN,b.banana.free.hr
