@@ -4,21 +4,13 @@ DOMAIN-SUFFIX,linguee.com
 DOMAIN-SUFFIX,deepl.com
 DOMAIN-KEYWORD,mini4k
 ;直连
-GEOSITE,bytedance,🇨🇳 追加规则
-GEOSITE,netease,🇨🇳 追加规则
-GEOSITE,amazon,🇨🇳 追加规则
-GEOSITE,microsoft,🇨🇳 追加规则
+GEOSITE,bytedance
+GEOSITE,netease
+GEOSITE,amazon
+GEOSITE,microsoft
 ;自建网站
 DOMAIN-SUFFIX,l53.net
-DOMAIN,music.soybean.us.kg
-DOMAIN,ma.soybean.us.kg
-DOMAIN,sss666.soybean.us.kg
-DOMAIN,music.newcation.us.kg
-DOMAIN,ma.newcation.us.kg
-DOMAIN,sss666.newcation.us.kg
-DOMAIN-KEYWORD,bytedance
-DOMAIN-KEYWORD,pitaya.bytedance
-DOMAIN-KEYWORD,udemy
-DOMAIN-KEYWORD,udemycdn
+GEOSITE,udemy
 DOMAIN-SUFFIX,openwrt.ai
+
 
