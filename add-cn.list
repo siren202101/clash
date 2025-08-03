@@ -1,10 +1,13 @@
 ;Deepl域名
-DOMAIN-KEYWORD,aws
-DOMAIN-KEYWORD,amazon
 DOMAIN-KEYWORD,webhostmost
 DOMAIN-SUFFIX,linguee.com
 DOMAIN-SUFFIX,deepl.com
 DOMAIN-KEYWORD,mini4k
+;直连
+GEOSITE,bytedance,🇨🇳 追加规则
+GEOSITE,netease,🇨🇳 追加规则
+GEOSITE,amazon,🇨🇳 追加规则
+GEOSITE,microsoft,🇨🇳 追加规则
 ;自建网站
 DOMAIN-SUFFIX,l53.net
 DOMAIN,music.soybean.us.kg
@@ -17,6 +20,5 @@ DOMAIN-KEYWORD,bytedance
 DOMAIN-KEYWORD,pitaya.bytedance
 DOMAIN-KEYWORD,udemy
 DOMAIN-KEYWORD,udemycdn
-DOMAIN-KEYWORD,akamaized
-DOMAIN-KEYWORD,microsoft
 DOMAIN-SUFFIX,openwrt.ai
+
