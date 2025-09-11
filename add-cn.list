@@ -2,7 +2,6 @@
 DOMAIN-KEYWORD,webhostmost
 DOMAIN-SUFFIX,linguee.com
 DOMAIN-SUFFIX,deepl.com
-DOMAIN-KEYWORD,mini4k
 ;直连
 GEOSITE,bytedance
 GEOSITE,netease
@@ -13,6 +12,7 @@ DOMAIN-SUFFIX,l53.net
 GEOSITE,udemy
 DOMAIN-SUFFIX,openwrt.ai
 DOMAIN,hub.tsangel.xx.kg
+
 
 
 
