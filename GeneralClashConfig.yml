@@ -123,6 +123,39 @@ dns:
       - gfw
     ipcidr:
       - 240.0.0.0/4
-
-
-
+sniffer:
+  enable: true
+  parse-pure-ip: true
+tun:
+  enable: true
+  stack: system
+  device: utun
+  dns-hijack:
+    - tcp://any:53
+  gso: true
+  gso-max-size: 65536
+  auto-route: false
+  auto-detect-interface: false
+  auto-redirect: false
+  strict-route: false
+profile:
+  store-selected: true
+listeners:
+  - name: mixed5
+    type: mixed
+    port: 50055
+    listen: 0.0.0.0
+    udp: true
+    proxy: 🇺🇸 Oracle-US-SanJose-Vless-Reality-Vision
+  - name: mixed6
+    type: mixed
+    port: 50056
+    listen: 0.0.0.0
+    udp: true
+    proxy: 🇺🇸 Oracle-US-SanJose-Vless-Reality-GRPC
+  - name: mixed7
+    type: mixed
+    port: 50057
+    listen: 0.0.0.0
+    udp: true
+    proxy: DIRECT
