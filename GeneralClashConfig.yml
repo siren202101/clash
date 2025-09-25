@@ -7,7 +7,6 @@ mode: rule
 allow-lan: true
 external-controller: 0.0.0.0:9090
 bind-address: "*"
-external-ui: "/usr/share/openclash/ui"
 geodata-mode: true
 geodata-loader: standard
 dns:
