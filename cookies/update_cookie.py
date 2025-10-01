@@ -5,8 +5,8 @@
 @Author: Gemini
 @Date: 2025-10-01
 @Description: 用于从指定API获取Cookie并更新到青龙面板环境变量的脚本。
-@Version: 3.0
-@Changes: 根据Cookie类型(nodeseek/right)分别更新不同的环境变量(NS_COOKIE/ES_COOKIE)。
+@Version: 3.2
+@Changes: 根据用户提供的API文档，将更新数据包装在 {"env": ...} 结构中，彻底解决 "id parameter is required" 错误。
 """
 
 import os
@@ -17,11 +17,6 @@ import sys
 # --- 全局配置 ---
 
 # 从环境变量中获取 Cookie API 的凭证信息
-# 请确保在青龙面板 -> 环境变量中设置了以下变量:
-# 1. UCC: 你的 Cookie API 基础地址 (例如: http://192.168.88.251:28088/cookie)
-# 2. CC_UUID: 你的 API UUID
-# 3. CC_PASSWORD: 你的 API 密码
-# 脚本会自动更新名为 NS_COOKIE 和 ES_COOKIE 的变量，请确保它们已存在。
 UCC_URL = os.getenv("UCC")
 CC_UUID = os.getenv("CC_UUID")
 CC_PASSWORD = os.getenv("CC_PASSWORD")
@@ -34,7 +29,7 @@ def check_configs():
     if not all([UCC_URL, CC_UUID, CC_PASSWORD]):
         print("错误：脚本所需的环境变量不完整！")
         print("请确保在青龙面板中正确设置了以下三个环境变量：")
-        print("1. UCC: 你的 Cookie API 基础地址 (例如: http://192.168.88.251:28088/cookie)")
+        print("1. UCC: 你的 Cookie API 基础地址")
         print("2. CC_UUID: 用于 API 认证的 UUID")
         print("3. CC_PASSWORD: 用于 API 认证的密码")
         sys.exit(1)
@@ -42,9 +37,7 @@ def check_configs():
     print(f"API 地址: {UCC_URL}")
 
 def get_latest_cookies(base_url, uuid, password):
-    """
-    通过API获取最新的Cookie。
-    """
+    """通过API获取最新的Cookie。"""
     api_url = f"{base_url}/get/{uuid}"
     headers = {"Content-Type": "application/json"}
     payload = {"password": password if password else ""}
@@ -65,9 +58,7 @@ def get_latest_cookies(base_url, uuid, password):
         return None
 
 def format_cookie_string(cookie_list):
-    """
-    将 JSON 格式的 Cookie 列表转换为原始 Cookie 字符串。
-    """
+    """将 JSON 格式的 Cookie 列表转换为原始 Cookie 字符串。"""
     if not isinstance(cookie_list, list):
         return ""
     
@@ -75,9 +66,7 @@ def format_cookie_string(cookie_list):
     return "; ".join(cookie_parts)
 
 def update_ql_env(env_name, new_value):
-    """
-    使用青龙内置的 QLAPI 更新环境变量。
-    """
+    """使用青龙内置的 QLAPI 更新环境变量。"""
     try:
         print(f"\n--- 开始更新变量: {env_name} ---")
         print(f"正在查询青龙环境变量: {env_name}")
@@ -100,17 +89,29 @@ def update_ql_env(env_name, new_value):
             return
 
         env_id = target_env.get("id") or target_env.get("_id")
+        if not env_id:
+            print(f"错误：无法从找到的环境变量中获取 ID。变量数据: {target_env}")
+            return
+            
         print(f"已找到目标变量，ID: {env_id}")
         
-        update_payload = {
+        # 这是 EnvItem 对象
+        env_item_payload = {
             "id": env_id,
+            "_id": env_id, # 同时包含id和_id以兼容不同版本
             "name": env_name,
             "value": new_value,
             "remarks": target_env.get("remarks", "")
         }
 
+        # 最终修复：根据API文档，将 EnvItem 作为 "env" 字段的值传递
+        # 这是 UpdateEnvRequest 对象
+        final_payload = {
+            "env": env_item_payload
+        }
+
         print("正在提交更新请求...")
-        update_result = QLAPI.updateEnv(update_payload)
+        update_result = QLAPI.updateEnv(final_payload) # <--- 使用包装后的最终 payload
         
         if update_result.get("code") == 200:
             print(f"✅ 环境变量 '{env_name}' 更新成功！")
@@ -160,7 +161,6 @@ if __name__ == "__main__":
         else:
             print("'right' 的 Cookie 数据为空，不执行更新。")
     
-    # 如果两种cookie都未找到
     if not updated:
         print("\n在返回的数据中未发现 'nodeseek' 或 'right' 相关的Cookie，本次无需更新。")
 
