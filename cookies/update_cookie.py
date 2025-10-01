@@ -5,6 +5,8 @@
 @Author: Gemini
 @Date: 2025-10-01
 @Description: 用于从指定API获取Cookie并更新到青龙面板环境变量的脚本。
+@Version: 2.0
+@Changes: API URL 现在通过环境变量 UCC 动态获取。
 """
 
 import os
@@ -16,36 +18,38 @@ import sys
 
 # 从环境变量中获取 Cookie API 的凭证信息
 # 请确保在青龙面板 -> 环境变量中设置了以下变量:
-# 1. CC_UUID: 你的 API UUID
-# 2. CC_PASSWORD: 你的 API 密码
-# 3. updated_cookie: 你想要在青龙面板中更新的Cookie变量名，例如 NS_COOKIE
+# 1. UCC: 你的 Cookie API 基础地址 (例如: http://192.168.88.251:28088/cookie)
+# 2. CC_UUID: 你的 API UUID
+# 3. CC_PASSWORD: 你的 API 密码
+# 4. updated_cookie: 你想要在青龙面板中更新的Cookie变量名，例如 NS_COOKIE
+UCC_URL = os.getenv("UCC")
 CC_UUID = os.getenv("CC_UUID")
 CC_PASSWORD = os.getenv("CC_PASSWORD")
 TARGET_ENV_NAME = os.getenv("updated_cookie") 
-
-# 你的 Cookie API 地址，根据你的实际情况修改
-# 注意：脚本中的 IP 地址是根据你提供的 curl 示例设置的
-API_BASE_URL = "http://192.168.88.251:28088"
 
 # --- 核心功能函数 ---
 
 def check_configs():
     """检查必要的环境变量是否已设置"""
     print("正在检查环境变量配置...")
-    if not all([CC_UUID, CC_PASSWORD, TARGET_ENV_NAME]):
+    if not all([UCC_URL, CC_UUID, CC_PASSWORD, TARGET_ENV_NAME]):
         print("错误：脚本所需的环境变量不完整！")
-        print("请确保在青龙面板中正确设置了以下三个环境变量：")
-        print("1. CC_UUID: 用于 API 认证的 UUID")
-        print("2. CC_PASSWORD: 用于 API 认证的密码")
-        print("3. updated_cookie: 需要更新的目标环境变量名称 (例如: NS_COOKIE)")
+        print("请确保在青龙面板中正确设置了以下四个环境变量：")
+        print("1. UCC: 你的 Cookie API 基础地址 (例如: http://192.168.88.251:28088/cookie)")
+        print("2. CC_UUID: 用于 API 认证的 UUID")
+        print("3. CC_PASSWORD: 用于 API 认证的密码")
+        print("4. updated_cookie: 需要更新的目标环境变量名称 (例如: NS_COOKIE)")
         sys.exit(1)
-    print(f"配置检查通过，将要更新的目标变量是: {TARGET_ENV_NAME}")
+    print("配置检查通过！")
+    print(f"API 地址: {UCC_URL}")
+    print(f"将要更新的目标变量: {TARGET_ENV_NAME}")
 
-def get_latest_cookies(uuid, password):
+def get_latest_cookies(base_url, uuid, password):
     """
     通过API获取最新的Cookie。
     """
-    api_url = f"{API_BASE_URL}/cookie/get/{uuid}"
+    # 拼接完整的请求 URL
+    api_url = f"{base_url}/get/{uuid}"
     headers = {"Content-Type": "application/json"}
     payload = {"password": password if password else ""}
     
@@ -60,7 +64,7 @@ def get_latest_cookies(uuid, password):
             print(f"响应内容: {response.text}")
             return None
     except requests.exceptions.RequestException as e:
-        print(f"错误：网络请求异常，请检查API地址和网络连接。")
+        print(f"错误：网络请求异常，请检查API地址 '{UCC_URL}' 和网络连接。")
         print(f"异常详情: {e}")
         return None
 
@@ -84,7 +88,6 @@ def update_ql_env(env_name, new_value):
     try:
         # 1. 查询环境变量，获取其 ID
         print(f"正在查询青龙环境变量: {env_name}")
-        # 使用 searchValue 进行模糊搜索
         search_result = QLAPI.getEnvs({"searchValue": env_name})
 
         if search_result.get("code") != 200:
@@ -94,7 +97,6 @@ def update_ql_env(env_name, new_value):
         target_env = None
         if search_result.get("data"):
             for env in search_result.get("data"):
-                # 精确匹配变量名
                 if env.get("name") == env_name:
                     target_env = env
                     break
@@ -104,16 +106,15 @@ def update_ql_env(env_name, new_value):
             print("请先在环境变量中手动创建一个同名变量。")
             return
 
-        env_id = target_env.get("id") or target_env.get("_id") # 兼容新旧版本
+        env_id = target_env.get("id") or target_env.get("_id")
         print(f"已找到目标变量，ID: {env_id}")
 
         # 2. 准备更新请求的数据
-        # 更新时需要提供 id, name, value 和 remarks
         update_payload = {
             "id": env_id,
             "name": env_name,
             "value": new_value,
-            "remarks": target_env.get("remarks", "") # 保持原有的备注不变
+            "remarks": target_env.get("remarks", "")
         }
 
         # 3. 调用更新接口
@@ -138,7 +139,7 @@ if __name__ == "__main__":
     check_configs()
     
     # 获取原始Cookie数据
-    cookie_data_json = get_latest_cookies(CC_UUID, CC_PASSWORD)
+    cookie_data_json = get_latest_cookies(UCC_URL, CC_UUID, CC_PASSWORD)
     
     if not cookie_data_json or "cookie_data" not in cookie_data_json:
         print("未能获取有效的 Cookie 数据，脚本终止。")
@@ -147,8 +148,7 @@ if __name__ == "__main__":
     all_cookies = cookie_data_json.get("cookie_data", {})
     new_cookie_value = None
     
-    # 根据要求，检查 'nodeseek' 或 'right' 是否存在于Cookie数据中
-    # 找到任何一个匹配项，就格式化并准备更新
+    # 检查 'nodeseek' 或 'right' 是否存在
     if "nodeseek" in all_cookies:
         print("检测到 'nodeseek' 的 Cookie，正在进行格式化...")
         new_cookie_value = format_cookie_string(all_cookies["nodeseek"])
@@ -161,7 +161,6 @@ if __name__ == "__main__":
     # 如果成功获取并格式化了新的Cookie值，则执行更新操作
     if new_cookie_value:
         print("格式化后的 Cookie 值为:")
-        # 为保护隐私，只显示部分内容
         print(f"{new_cookie_value[:50]}...") 
         update_ql_env(TARGET_ENV_NAME, new_cookie_value)
     
