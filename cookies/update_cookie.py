@@ -150,14 +150,14 @@ if __name__ == "__main__":
         else:
             print("'nodeseek' 的 Cookie 数据为空，不执行更新。")
 
-    # 逻辑2: 检查 'right' 并更新 'ES_COOKIE'
+    # 逻辑2: 检查 'right' 并更新 'ENSHANCK'
     if "right" in all_cookies:
         updated = True
         print("检测到 'right' 的 Cookie，正在处理...")
-        es_cookie_value = format_cookie_string(all_cookies["right"])
-        if es_cookie_value:
-            print(f"格式化的 ES_COOKIE: {es_cookie_value[:50]}...")
-            update_ql_env("ES_COOKIE", es_cookie_value)
+        ENSHANCK_value = format_cookie_string(all_cookies["right"])
+        if ENSHANCK_value:
+            print(f"格式化的 ENSHANCK: {ENSHANCK_value[:50]}...")
+            update_ql_env("ENSHANCK", ENSHANCK_value)
         else:
             print("'right' 的 Cookie 数据为空，不执行更新。")
     
