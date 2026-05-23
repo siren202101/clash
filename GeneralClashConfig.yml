@@ -18,8 +18,11 @@ dns:
   listen: 0.0.0.0:1053
   ipv6: true
   default-nameserver:
-    - 116.116.116.116
-    - 221.5.88.88
+    - 114.114.114.114
+    - 223.5.5.5
+    - 223.6.6.6
+    - 119.29.29.29
+    - 119.28.28.28
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
   fake-ip-filter-mode: blacklist
@@ -68,22 +71,3 @@ tun:
   strict-route: false
 profile:
   store-selected: true
-listeners:
-  - name: mixed5
-    type: mixed
-    port: 50055
-    listen: 0.0.0.0
-    udp: true
-    proxy: 🇺🇸 Oracle-US-SanJose-Vless-Reality-Vision
-  - name: mixed6
-    type: mixed
-    port: 50056
-    listen: 0.0.0.0
-    udp: true
-    proxy: 🇺🇸 Oracle-US-SanJose-Vless-Reality-GRPC
-  - name: mixed7
-    type: mixed
-    port: 50057
-    listen: 0.0.0.0
-    udp: true
-    proxy: DIRECT
